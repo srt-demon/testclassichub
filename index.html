@@ -460,24 +460,27 @@ Development by slowdown
                     <!-- Кнопка достижений с тултипом -->
                     <div style="position:relative;flex-shrink:0;margin-right:10px;" id="ach-feed-wrap">
                         <span onclick="event.stopPropagation();_achFeedToggle(this)" id="ach-medal-btn" style="
-                            display:inline-flex;align-items:center;justify-content:center;
-                            width:32px;height:32px;border-radius:50%;
-                            background:rgba(212,175,55,0.07);border:1px solid rgba(212,175,55,0.25);
-                            cursor:pointer;user-select:none;font-size:15px;line-height:1;
+                            display:inline-flex;align-items:center;gap:8px;
+                            height:32px;padding:2px 14px 2px 3px;border-radius:9999px;
+                            background:rgba(212,175,55,0.07);border:1px solid rgba(212,175,55,0.3);
+                            cursor:pointer;user-select:none;white-space:nowrap;
                             transition:background .15s,border-color .15s;
+                            animation: ach-badge-pulse 2.4s ease-in-out infinite;
                         "
-                        onmouseover="this.style.background='rgba(212,175,55,0.18)';this.style.borderColor='rgba(212,175,55,0.5)';document.getElementById('ach-medal-tip').style.opacity='1'"
-                        onmouseout="this.style.background='rgba(212,175,55,0.07)';this.style.borderColor='rgba(212,175,55,0.25)';document.getElementById('ach-medal-tip').style.opacity='0'"><img src="https://media.forgecdn.net/avatars/thumbnails/195/535/256/256/636879664591858480.png" style="width:20px;height:20px;object-fit:contain;"></span>
-                        <div id="ach-medal-tip" style="
-                            position:fixed;
-                            background:#111;border:1px solid rgba(212,175,55,0.4);
-                            border-radius:8px;padding:5px 12px;
-                            font-size:10px;font-weight:700;color:#D4AF37;
-                            white-space:nowrap;pointer-events:none;
-                            opacity:0;transition:opacity 0.15s;
-                            z-index:9999;letter-spacing:.04em;
-                        ">ПОСЛЕДНИЕ ДОСТИЖЕНИЯ</div>
+                        onmouseover="this.style.background='rgba(212,175,55,0.18)';this.style.borderColor='rgba(212,175,55,0.55)';"
+                        onmouseout="this.style.background='rgba(212,175,55,0.07)';this.style.borderColor='rgba(212,175,55,0.3)';">
+                            <span style="width:26px;height:26px;border-radius:50%;background:rgba(212,175,55,0.12);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                <img src="https://media.forgecdn.net/avatars/thumbnails/195/535/256/256/636879664591858480.png" style="width:17px;height:17px;object-fit:contain;">
+                            </span>
+                            <span style="font-size:10px;font-weight:900;color:#D4AF37;text-transform:uppercase;letter-spacing:.05em;">Последние достижения</span>
+                        </span>
                     </div>
+                    <style>
+                        @keyframes ach-badge-pulse {
+                            0%, 100% { box-shadow: 0 0 0 0 rgba(212,175,55,0.35); }
+                            50% { box-shadow: 0 0 0 5px rgba(212,175,55,0); }
+                        }
+                    </style>
 
                     <!-- Профиль / Вход / Регистрация -->
                     <div id="profile-guest-wrap" style="display:flex;align-items:center;gap:6px;flex-shrink:0;flex-wrap:nowrap;white-space:nowrap;">
@@ -791,15 +794,6 @@ Development by slowdown
                         <div id="profile-ach-count" class="font-black text-purple-300" style="font-size:1.15rem;">-</div>
                         <div class="text-gray-600 uppercase tracking-widest mt-0.5" style="font-size:8px;">Ачивок</div>
                     </div>
-                </div>
-
-                <div id="profile-pending-section" style="display:none;margin-bottom:16px;background:rgba(234,179,8,0.06);border:1px solid rgba(234,179,8,0.3);border-radius:12px;padding:14px 16px;">
-                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-                        <span style="width:8px;height:8px;border-radius:50%;background:#eab308;box-shadow:0 0 6px #eab30888;animation:pulse-dot 2s cubic-bezier(0.4,0,0.6,1) infinite;flex-shrink:0;"></span>
-                        <span style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#eab308;">Заявка на рассмотрении</span>
-                    </div>
-                    <div id="profile-pending-title" style="font-size:13px;font-weight:700;color:#fff;margin-bottom:2px;"></div>
-                    <div style="font-size:11px;color:#888;">Постройка появится на сайте, как только администратор её проверит и опубликует.</div>
                 </div>
 
                 <div class="profile-two-col grid gap-3" style="grid-template-columns:0.95fr 1.1fr 0.95fr;">
@@ -1483,12 +1477,19 @@ function loadActiveEventFromDB() {
             });
         }
         if (active) {
-            nameEl.innerText = active.title;
+            nameEl.innerText = _extractQuotedTitle(active.title);
             badge.style.display = '';
         } else {
             badge.style.display = 'none';
         }
     });
+}
+
+function _extractQuotedTitle(title) {
+    if (!title) return '';
+    // Берём текст в кавычках («...», "...", '...'), если он есть - иначе полный заголовок
+    const m = String(title).match(/[«"']([^»"']+)[»"']/);
+    return m ? m[1].trim() : title;
 }
 
 let customAchievements = {}; 
@@ -2174,27 +2175,48 @@ function openAuthorProfile(nameOverride) {
         if (ov) ov.style.display = 'flex';
     }
 }
-function _renderPendingSection(authorName) {
-    const sec = document.getElementById('profile-pending-section');
-    if (!sec) return;
-    sec.style.display = 'none';
-    // Показываем только владельцу профиля - статус его собственной заявки
-    if (!window.currentPlayer || window.currentPlayer.nick !== authorName || !window._fbDb) return;
+function _viewMyRequests() {
+    if (!window.currentPlayer || !window._fbDb) return;
+    closeAuthorProfile();
+    closeModal();
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    _setSortVisible(false);
+    document.getElementById('page-title').innerHTML = `Мои заявки`;
+    const container = document.getElementById('builds-container');
+    container.className = '';
+    container.innerHTML = '<div style="color:#666;text-align:center;padding:40px 0;">Загрузка...</div>';
+
     window._fbGet(window._fbRef(window._fbDb, 'users/' + window.currentPlayer.uid + '/pendingSubmission')).then(function(snap) {
         const data = snap.val();
         if (data && data.status === 'pending') {
-            const titleEl = document.getElementById('profile-pending-title');
-            if (titleEl) titleEl.innerText = data.title || '';
-            sec.style.display = '';
+            const when = data.createdAt ? new Date(data.createdAt).toLocaleString('ru-RU') : '';
+            container.innerHTML =
+                '<div style="max-width:520px;margin:0 auto;background:rgba(234,179,8,0.06);border:1px solid rgba(234,179,8,0.3);border-radius:14px;padding:20px 22px;">'
+                    + '<div style="display:flex;align-items:center;gap:9px;margin-bottom:8px;">'
+                        + '<span style="width:9px;height:9px;border-radius:50%;background:#eab308;box-shadow:0 0 6px #eab30888;animation:pulse-dot 2s cubic-bezier(0.4,0,0.6,1) infinite;flex-shrink:0;"></span>'
+                        + '<span style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#eab308;">Заявка на рассмотрении</span>'
+                    + '</div>'
+                    + '<div style="font-size:16px;font-weight:800;color:#fff;margin-bottom:4px;">' + _escHtml(data.title || '') + '</div>'
+                    + (when ? '<div style="font-size:11px;color:#666;margin-bottom:10px;">Отправлена: ' + when + '</div>' : '')
+                    + '<div style="font-size:12px;color:#999;line-height:1.6;">Постройка появится на сайте, как только администратор её проверит и опубликует. Как только это произойдёт, статус здесь обновится.</div>'
+                + '</div>';
+        } else {
+            container.innerHTML = '<div style="color:#666;text-align:center;padding:40px 0;font-size:13px;">Активных заявок нет — можешь отправить новую через «Заявить о постройке».</div>';
         }
-    }).catch(function() {});
+    }).catch(function() {
+        container.innerHTML = '<div style="color:#f87171;text-align:center;padding:40px 0;font-size:13px;">Не удалось загрузить статус заявки.</div>';
+    });
+}
+function _escHtml(s) {
+    return String(s).replace(/[&<>"']/g, function(c) {
+        return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
 }
 
 function _openAuthorProfileImpl(nameOverride) {
     const authorName = nameOverride || document.getElementById('author-name').innerText;
     if (!authorName) return;
 
-    _renderPendingSection(authorName);
     _ptRenderProfile(authorName);
     _eqRenderProfile(authorName);
 
@@ -9192,29 +9214,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 })();
 
-// медалей-тултип
-(function() {
-    var btn = document.getElementById('ach-medal-btn');
-    var tip = document.getElementById('ach-medal-tip');
-    if (!btn || !tip) return;
-    btn.addEventListener('mouseenter', function() {
-        var r = btn.getBoundingClientRect();
-        tip.style.top  = (r.top - tip.offsetHeight - 10) + 'px';
-        tip.style.left = (r.right - tip.offsetWidth) + 'px';
-        tip.style.opacity = '1';
-    });
-    btn.addEventListener('mouseleave', function() {
-        tip.style.opacity = '0';
-    });
-    
-    btn.addEventListener('mousemove', function() {
-        if (tip.style.opacity === '1') {
-            var r = btn.getBoundingClientRect();
-            tip.style.top  = (r.top - tip.offsetHeight - 10) + 'px';
-            tip.style.left = (r.right - tip.offsetWidth) + 'px';
-        }
-    });
-})();
 </script>
 
 
@@ -11133,6 +11132,7 @@ function _eventImgLightbox(url, title) {
         box-shadow:0 20px 50px rgba(0,0,0,0.6);overflow:hidden;z-index:9999;">
         <a href="#" onclick="event.preventDefault();_profileDropdownToggle();openAuthorProfile(currentPlayer.nick)" style="display:block;padding:11px 16px;font-size:12px;font-weight:700;color:#eee;">Мой профиль</a>
         <a href="#" onclick="event.preventDefault();_profileDropdownToggle();_viewMyBuilds()" style="display:block;padding:11px 16px;font-size:12px;font-weight:700;color:#eee;border-top:1px solid rgba(255,255,255,0.06);">Мои постройки</a>
+        <a href="#" onclick="event.preventDefault();_profileDropdownToggle();_viewMyRequests()" style="display:block;padding:11px 16px;font-size:12px;font-weight:700;color:#eee;border-top:1px solid rgba(255,255,255,0.06);">Мои заявки</a>
         <a href="#" onclick="event.preventDefault();_profileDropdownToggle();toggleQuestion(true)" style="display:block;padding:11px 16px;font-size:12px;font-weight:700;color:#eee;border-top:1px solid rgba(255,255,255,0.06);">Тех. поддержка</a>
         <a href="#" onclick="event.preventDefault();_profileDropdownToggle();_authLogout()" style="display:block;padding:11px 16px;font-size:12px;font-weight:700;color:#f87171;border-top:1px solid rgba(255,255,255,0.06);">Выйти</a>
     </div>
