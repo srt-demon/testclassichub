@@ -429,7 +429,7 @@ Development by slowdown
                     </span>
                 </div>
 
-                <div class="flex items-center gap-3 flex-shrink-0">
+                <div class="flex items-center gap-3 flex-shrink-0" style="flex-wrap:nowrap;">
                     <button id="claim-build-btn" onclick="toggleForm(true)" style="display:none;"
                             class="bg-[#333] hover:bg-[#D4AF37] hover:text-black text-white rounded-full font-extrabold transition-all duration-300 flex items-center gap-2 h-10 border border-white/10 hover:border-transparent px-3 md:px-5">
                         
@@ -457,7 +457,7 @@ Development by slowdown
                 <a href="#" class="nav-tab" id="nav-tab-map">Карта</a>
                 <a href="#" class="nav-tab" id="nav-tab-cases">Кейсы</a>
                 <div class="ml-auto flex items-center gap-2 flex-shrink-0" style="flex-wrap:nowrap;">
-                    <!-- Кнопка достижений с тултипом -->
+                    <!-- Кнопка достижений -->
                     <div style="position:relative;flex-shrink:0;margin-right:10px;" id="ach-feed-wrap">
                         <span onclick="event.stopPropagation();_achFeedToggle(this)" id="ach-medal-btn" style="
                             display:inline-flex;align-items:center;gap:8px;
@@ -475,12 +475,6 @@ Development by slowdown
                             <span style="font-size:10px;font-weight:900;color:#D4AF37;text-transform:uppercase;letter-spacing:.05em;">Последние достижения</span>
                         </span>
                     </div>
-                    <style>
-                        @keyframes ach-badge-pulse {
-                            0%, 100% { box-shadow: 0 0 0 0 rgba(212,175,55,0.35); }
-                            50% { box-shadow: 0 0 0 5px rgba(212,175,55,0); }
-                        }
-                    </style>
 
                     <!-- Профиль / Вход / Регистрация -->
                     <div id="profile-guest-wrap" style="display:flex;align-items:center;gap:6px;flex-shrink:0;flex-wrap:nowrap;white-space:nowrap;">
@@ -498,9 +492,9 @@ Development by slowdown
                             height:36px;padding:3px 14px 3px 3px;border-radius:9999px;
                             background:linear-gradient(135deg,rgba(212,175,55,0.22),rgba(212,175,55,0.06));
                             border:1.5px solid rgba(212,175,55,0.6);
-                            box-shadow:0 0 0 1px rgba(212,175,55,0.12),0 4px 16px rgba(212,175,55,0.25);
-                            cursor:pointer;user-select:none;transition:background .15s,border-color .15s,box-shadow .15s;">
-                            <img id="profile-nav-head" src="" style="width:28px;height:28px;border-radius:50%;image-rendering:pixelated;object-fit:cover;box-shadow:0 0 0 2px rgba(212,175,55,0.5);" onerror="this.src='https://visage.surgeplay.com/head/28/Steve'">
+                            cursor:pointer;user-select:none;transition:background .15s,border-color .15s;
+                            animation: ach-badge-pulse 2.4s ease-in-out infinite;">
+                            <img id="profile-nav-head" src="" style="width:28px;height:28px;border-radius:50%;image-rendering:pixelated;object-fit:cover;" onerror="this.src='https://visage.surgeplay.com/head/28/Steve'">
                             <span id="profile-nav-nick" style="font-size:12px;font-weight:900;color:#D4AF37;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;letter-spacing:.02em;"></span>
                         </button>
                     </div>
@@ -511,6 +505,10 @@ Development by slowdown
 
     <style>
         
+        @keyframes ach-badge-pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(212,175,55,0.35); }
+            50% { box-shadow: 0 0 0 5px rgba(212,175,55,0); }
+        }
         .nav-exp-badge {
             display: inline-flex;
             align-items: center;
@@ -549,6 +547,7 @@ Development by slowdown
         
         .nav-exp-badge:hover .nav-short { opacity: 0; max-width: 0; }
         .nav-exp-badge:hover .nav-full  { opacity: 1; max-width: 220px; }
+        #header-event-badge:hover .nav-full { max-width: 360px; }
 
         
         .has-tip { position: relative; }
@@ -2186,20 +2185,26 @@ function _viewMyRequests() {
     container.className = '';
     container.innerHTML = '<div style="color:#666;text-align:center;padding:40px 0;">Загрузка...</div>';
 
-    window._fbGet(window._fbRef(window._fbDb, 'users/' + window.currentPlayer.uid + '/pendingSubmission')).then(function(snap) {
+    window._fbGet(window._fbRef(window._fbDb, 'users/' + window.currentPlayer.uid + '/pendingSubmissions')).then(function(snap) {
         const data = snap.val();
-        if (data && data.status === 'pending') {
-            const when = data.createdAt ? new Date(data.createdAt).toLocaleString('ru-RU') : '';
-            container.innerHTML =
-                '<div style="max-width:520px;margin:0 auto;background:rgba(234,179,8,0.06);border:1px solid rgba(234,179,8,0.3);border-radius:14px;padding:20px 22px;">'
-                    + '<div style="display:flex;align-items:center;gap:9px;margin-bottom:8px;">'
-                        + '<span style="width:9px;height:9px;border-radius:50%;background:#eab308;box-shadow:0 0 6px #eab30888;animation:pulse-dot 2s cubic-bezier(0.4,0,0.6,1) infinite;flex-shrink:0;"></span>'
-                        + '<span style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#eab308;">Заявка на рассмотрении</span>'
-                    + '</div>'
-                    + '<div style="font-size:16px;font-weight:800;color:#fff;margin-bottom:4px;">' + _escHtml(data.title || '') + '</div>'
-                    + (when ? '<div style="font-size:11px;color:#666;margin-bottom:10px;">Отправлена: ' + when + '</div>' : '')
-                    + '<div style="font-size:12px;color:#999;line-height:1.6;">Постройка появится на сайте, как только администратор её проверит и опубликует. Как только это произойдёт, статус здесь обновится.</div>'
-                + '</div>';
+        const entries = data ? Object.keys(data).map(function(pid){ return Object.assign({pid: pid}, data[pid]); }) : [];
+        const pending = entries.filter(function(e){ return e.status === 'pending'; })
+                                .sort(function(a,b){ return (b.createdAt||0) - (a.createdAt||0); });
+        if (pending.length) {
+            container.innerHTML = '<div style="max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:12px;">' +
+                pending.map(function(data) {
+                    const when = data.createdAt ? new Date(data.createdAt).toLocaleString('ru-RU') : '';
+                    return '<div style="background:rgba(234,179,8,0.06);border:1px solid rgba(234,179,8,0.3);border-radius:14px;padding:20px 22px;">'
+                        + '<div style="display:flex;align-items:center;gap:9px;margin-bottom:8px;">'
+                            + '<span style="width:9px;height:9px;border-radius:50%;background:#eab308;box-shadow:0 0 6px #eab30888;animation:pulse-dot 2s cubic-bezier(0.4,0,0.6,1) infinite;flex-shrink:0;"></span>'
+                            + '<span style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#eab308;">Заявка на рассмотрении</span>'
+                        + '</div>'
+                        + '<div style="font-size:16px;font-weight:800;color:#fff;margin-bottom:4px;">' + _escHtml(data.title || '') + '</div>'
+                        + (when ? '<div style="font-size:11px;color:#666;margin-bottom:10px;">Отправлена: ' + when + '</div>' : '')
+                        + '<div style="font-size:12px;color:#999;line-height:1.6;">Постройка появится на сайте, как только администратор её проверит и опубликует. Как только это произойдёт, статус здесь обновится.</div>'
+                    + '</div>';
+                }).join('') +
+            '</div>';
         } else {
             container.innerHTML = '<div style="color:#666;text-align:center;padding:40px 0;font-size:13px;">Активных заявок нет — можешь отправить новую через «Заявить о постройке».</div>';
         }
@@ -3311,8 +3316,8 @@ function submitToGoogleForm() {
                 status: 'pending', createdAt: Date.now()
             };
             pendingRef.set(pendingData).then(function() {
-                return _fbCompat.ref('users/' + window.currentPlayer.uid + '/pendingSubmission').set({
-                    pid: pid, title: title, status: 'pending', createdAt: Date.now()
+                return _fbCompat.ref('users/' + window.currentPlayer.uid + '/pendingSubmissions/' + pid).set({
+                    title: title, status: 'pending', createdAt: Date.now()
                 });
             }).catch(function(e) { console.warn('[pendingBuilds] не удалось создать заявку:', e); });
         } catch (e) { console.warn('[pendingBuilds] error:', e); }
@@ -9208,7 +9213,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     _syncNavFull();
     setInterval(_syncNavFull, 1500);
-    ['mc-online-count','header-trend-name','header-season-name'].forEach(function(id) {
+    ['mc-online-count','header-trend-name','header-season-name','header-event-name'].forEach(function(id) {
         var el = document.getElementById(id);
         if (el) new MutationObserver(_syncNavFull).observe(el, {childList:true, characterData:true, subtree:true});
     });
