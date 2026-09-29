@@ -152,6 +152,18 @@ Development by slowdown
             color: #ffffff;
             border-bottom: 3px solid #D4AF37;
         }
+        .nav-tab-icon {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            margin-right: 6px;
+            vertical-align: -3px;
+            opacity: 0.75;
+            transition: opacity 0.4s;
+        }
+        .nav-tab:hover .nav-tab-icon, .nav-tab.active .nav-tab-icon {
+            opacity: 1;
+        }
 
         .build-card {
             background: #252525;
@@ -430,32 +442,49 @@ Development by slowdown
                 </div>
 
                 <div class="flex items-center gap-3 flex-shrink-0" style="flex-wrap:nowrap;">
+                    <!-- Профиль / Вход / Регистрация -->
+                    <div id="profile-guest-wrap" style="display:flex;flex-direction:row;align-items:center;gap:6px;flex-shrink:0;flex-wrap:nowrap;white-space:nowrap;">
+                        <button id="profile-login-btn" onclick="toggleAuthModal(true,'login')"
+                                class="bg-[#333] hover:bg-white/10 text-gray-300 hover:text-white rounded-full font-extrabold transition-all duration-300 flex items-center gap-2 h-8 border border-white/10 px-3"
+                                style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;flex-shrink:0;">Войти</button>
+                        <button id="profile-register-btn" onclick="toggleAuthModal(true,'register')"
+                                class="bg-[#D4AF37] hover:brightness-110 text-black rounded-full font-extrabold transition-all duration-300 flex items-center gap-2 h-8 px-3"
+                                style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;flex-shrink:0;">Регистрация</button>
+                    </div>
+
                     <button id="claim-build-btn" onclick="toggleForm(true)" style="display:none;"
                             class="bg-[#333] hover:bg-[#D4AF37] hover:text-black text-white rounded-full font-extrabold transition-all duration-300 flex items-center gap-2 h-10 border border-white/10 hover:border-transparent px-3 md:px-5">
                         
                         <span class="hidden md:inline uppercase tracking-widest text-xs whitespace-nowrap">Заявить о постройке</span>
                         <span class="text-lg leading-none md:hidden">!</span>
                     </button>
-                    <button id="header-support-btn" onclick="toggleQuestion(true)" style="display:none;"
-                            class="bg-[#333] hover:bg-white/10 text-gray-300 hover:text-white rounded-full font-extrabold transition-all duration-300 flex items-center gap-2 h-10 border border-white/10 px-3 md:px-5">
-                            
-                        <span class="hidden md:inline uppercase tracking-widest text-xs whitespace-nowrap">Тех. Поддержка</span>
-                        <span class="text-base leading-none md:hidden">?</span>
-                    </button>
+
+                    <div style="position:relative;flex-shrink:0;display:none;" id="profile-nav-wrap">
+                        <button onclick="event.stopPropagation();_profileDropdownToggle()" id="profile-nav-btn" style="
+                            display:inline-flex;align-items:center;gap:8px;
+                            height:36px;padding:3px 14px 3px 3px;border-radius:9999px;
+                            background:linear-gradient(135deg,rgba(212,175,55,0.22),rgba(212,175,55,0.06));
+                            border:1.5px solid rgba(212,175,55,0.6);
+                            cursor:pointer;user-select:none;transition:background .15s,border-color .15s;
+                            animation: ach-badge-pulse 2.4s ease-in-out infinite;">
+                            <img id="profile-nav-head" src="" style="width:28px;height:28px;border-radius:50%;image-rendering:pixelated;object-fit:cover;animation: ach-badge-pulse 2.4s ease-in-out infinite;" onerror="this.src='https://visage.surgeplay.com/head/28/Steve'">
+                            <span id="profile-nav-nick" style="font-size:12px;font-weight:900;color:#D4AF37;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;letter-spacing:.02em;"></span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <nav class="flex items-center gap-6 overflow-x-auto scrollbar-none" style="scrollbar-width:none;-ms-overflow-style:none;padding-bottom:6px;">
-                <a href="#" class="nav-tab active">Все постройки</a>
-                <a href="#" class="nav-tab">Топ авторов</a>
-                <a href="#" class="nav-tab">Достижения</a>
-                <a href="#" class="nav-tab">Информация</a>
-                <a href="#" class="nav-tab">Архив</a>
-                <a href="#" class="nav-tab" id="nav-tab-events">События</a>
-                <a href="#" class="nav-tab" id="tab-updates-link">Обновления<span id="updates-dot" style="display:none;width:7px;height:7px;border-radius:50%;background:#4ade80;margin-left:5px;vertical-align:middle;box-shadow:0 0 6px #4ade80;animation:pulse-dot 1.4s infinite;" title="Новое обновление"></span></a>
-                <a href="#" class="nav-tab" id="nav-tab-shop">Магазин</a>
-                <a href="#" class="nav-tab" id="nav-tab-map">Карта</a>
-                <a href="#" class="nav-tab" id="nav-tab-cases">Кейсы</a>
+                <a href="#" class="nav-tab active"><svg class="nav-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6M9 11h.01M15 11h.01M9 15h.01M15 15h.01"/></svg>Все постройки</a>
+                <a href="#" class="nav-tab"><svg class="nav-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Топ авторов</a>
+                <a href="#" class="nav-tab"><svg class="nav-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M8.5 13.5 7 22l5-3 5 3-1.5-8.5"/></svg>Достижения</a>
+                <a href="#" class="nav-tab"><svg class="nav-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-5M12 8h.01"/></svg>Информация</a>
+                <a href="#" class="nav-tab"><svg class="nav-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8M10 13h4"/></svg>Архив</a>
+                <a href="#" class="nav-tab" id="nav-tab-events"><svg class="nav-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M8 15h.01M12 15h.01M16 15h.01"/></svg>События</a>
+                <a href="#" class="nav-tab" id="tab-updates-link"><svg class="nav-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6"/></svg>Обновления<span id="updates-dot" style="display:none;width:7px;height:7px;border-radius:50%;background:#4ade80;margin-left:5px;vertical-align:middle;box-shadow:0 0 6px #4ade80;animation:pulse-dot 1.4s infinite;" title="Новое обновление"></span></a>
+                <a href="#" class="nav-tab" id="nav-tab-shop"><svg class="nav-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg>Магазин</a>
+                <a href="#" class="nav-tab" id="nav-tab-map"><svg class="nav-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 20 3 17V4l6 3 6-3 6 3v13l-6-3-6 3Z"/><path d="M9 7v13M15 4v13"/></svg>Карта</a>
+                <a href="#" class="nav-tab" id="nav-tab-cases"><svg class="nav-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M3 12h18M12 8v13M8 8V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Кейсы</a>
                 <div class="ml-auto flex items-center gap-2 flex-shrink-0" style="flex-wrap:nowrap;">
                     <!-- Кнопка достижений -->
                     <div style="position:relative;flex-shrink:0;margin-right:10px;" id="ach-feed-wrap">
@@ -470,33 +499,10 @@ Development by slowdown
                         onmouseover="this.style.background='rgba(212,175,55,0.18)';this.style.borderColor='rgba(212,175,55,0.55)';"
                         onmouseout="this.style.background='rgba(212,175,55,0.07)';this.style.borderColor='rgba(212,175,55,0.3)';">
                             <span style="width:26px;height:26px;border-radius:50%;background:rgba(212,175,55,0.12);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">
-                                <img src="https://media.forgecdn.net/avatars/thumbnails/195/535/256/256/636879664591858480.png" style="width:17px;height:17px;object-fit:contain;">
+                                <img src="https://media.forgecdn.net/avatars/thumbnails/195/535/256/256/636879664591858480.png" style="width:17px;height:17px;object-fit:contain;animation: ach-badge-pulse 2.4s ease-in-out infinite;">
                             </span>
                             <span style="font-size:10px;font-weight:900;color:#D4AF37;text-transform:uppercase;letter-spacing:.05em;">Последние достижения</span>
                         </span>
-                    </div>
-
-                    <!-- Профиль / Вход / Регистрация -->
-                    <div id="profile-guest-wrap" style="display:flex;align-items:center;gap:6px;flex-shrink:0;flex-wrap:nowrap;white-space:nowrap;">
-                        <button id="profile-login-btn" onclick="toggleAuthModal(true,'login')"
-                                class="bg-[#333] hover:bg-white/10 text-gray-300 hover:text-white rounded-full font-extrabold transition-all duration-300 flex items-center gap-2 h-8 border border-white/10 px-3"
-                                style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;">Войти</button>
-                        <button id="profile-register-btn" onclick="toggleAuthModal(true,'register')"
-                                class="bg-[#D4AF37] hover:brightness-110 text-black rounded-full font-extrabold transition-all duration-300 flex items-center gap-2 h-8 px-3"
-                                style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;">Регистрация</button>
-                    </div>
-
-                    <div style="position:relative;flex-shrink:0;display:none;" id="profile-nav-wrap">
-                        <button onclick="event.stopPropagation();_profileDropdownToggle()" id="profile-nav-btn" style="
-                            display:inline-flex;align-items:center;gap:8px;
-                            height:36px;padding:3px 14px 3px 3px;border-radius:9999px;
-                            background:linear-gradient(135deg,rgba(212,175,55,0.22),rgba(212,175,55,0.06));
-                            border:1.5px solid rgba(212,175,55,0.6);
-                            cursor:pointer;user-select:none;transition:background .15s,border-color .15s;
-                            animation: ach-badge-pulse 2.4s ease-in-out infinite;">
-                            <img id="profile-nav-head" src="" style="width:28px;height:28px;border-radius:50%;image-rendering:pixelated;object-fit:cover;" onerror="this.src='https://visage.surgeplay.com/head/28/Steve'">
-                            <span id="profile-nav-nick" style="font-size:12px;font-weight:900;color:#D4AF37;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;letter-spacing:.02em;"></span>
-                        </button>
                     </div>
                 </div>
             </nav>
@@ -512,7 +518,6 @@ Development by slowdown
         .nav-exp-badge {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
             padding: 6px 12px;
             border-radius: 9999px;
             font-size: 10px;
@@ -531,23 +536,34 @@ Development by slowdown
         .nav-short {
             opacity: 1;
             max-width: 80px;
+            margin-left: 6px;
             overflow: hidden;
             white-space: nowrap;
-            transition: opacity 0.2s ease, max-width 0.35s cubic-bezier(0.4,0,0.2,1);
+            transition: opacity 0.2s ease, max-width 0.35s cubic-bezier(0.4,0,0.2,1), margin-left 0.35s cubic-bezier(0.4,0,0.2,1);
         }
         .nav-full {
             opacity: 0;
             max-width: 0;
+            margin-left: 0;
             overflow: hidden;
             white-space: nowrap;
             display: inline-block;
             vertical-align: middle;
-            transition: opacity 0.25s ease, max-width 0.35s cubic-bezier(0.4,0,0.2,1);
+            transition: opacity 0.25s ease, max-width 0.35s cubic-bezier(0.4,0,0.2,1), margin-left 0.35s cubic-bezier(0.4,0,0.2,1);
         }
         
-        .nav-exp-badge:hover .nav-short { opacity: 0; max-width: 0; }
-        .nav-exp-badge:hover .nav-full  { opacity: 1; max-width: 220px; }
-        #header-event-badge:hover .nav-full { max-width: 360px; }
+        .nav-exp-badge:hover .nav-short { opacity: 0; max-width: 0; margin-left: 0; }
+        .nav-exp-badge:hover .nav-full  { opacity: 1; max-width: 220px; margin-left: 6px; }
+        /* У этой плашки короткий вид шире (полное имя события без обрезки),
+           поэтому её collapse-на-hover правило тоже должно быть ID-специфичным -
+           иначе рядовое правило .nav-exp-badge:hover .nav-short проигрывает по specificity
+           более узкому #header-event-badge .nav-short и текст не схлопывается на ховере. */
+        #header-event-badge .nav-short { max-width: 200px; }
+        #header-event-badge:hover .nav-short { max-width: 0; opacity: 0; margin-left: 0; }
+        #header-event-badge:hover .nav-full { max-width: 360px; opacity: 1; margin-left: 6px; }
+        #profile-guest-wrap { display:flex; flex-direction:row !important; align-items:center !important; flex-wrap:nowrap !important; gap:6px !important; }
+        #profile-guest-wrap button { flex-shrink:0 !important; }
+        #profile-guest-wrap[hidden], #profile-guest-wrap.auth-hidden { display:none !important; }
 
         
         .has-tip { position: relative; }
@@ -773,6 +789,13 @@ Development by slowdown
                     <canvas id="profile-pet-canvas" style="width:110px;height:110px;display:block;border-radius:12px;cursor:grab;"></canvas>
                 </div>
                 <button onclick="closeAuthorProfile()" class="absolute top-3 right-3 z-10 bg-black/60 text-white w-8 h-8 rounded-full hover:bg-[#D4AF37] hover:text-black transition flex items-center justify-center border border-white/10 text-xs">✕</button>
+                <button id="profile-bg-edit-btn" onclick="_bgReqOpen()"
+                        style="display:none;position:absolute;right:14px;bottom:10px;z-index:11;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:rgba(0,0,0,0.55);border:1px solid rgba(212,175,55,0.35);color:#D4AF37;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;cursor:pointer;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);transition:background .15s,color .15s,border-color .15s;"
+                        onmouseover="this.style.background='#D4AF37';this.style.color='#000';this.style.borderColor='#D4AF37';"
+                        onmouseout="this.style.background='rgba(0,0,0,0.55)';this.style.color='#D4AF37';this.style.borderColor='rgba(212,175,55,0.35)';">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+                    Изменить фон
+                </button>
             </div>
 
             <div class="p-5" style="padding-top:42px;">
@@ -2185,25 +2208,45 @@ function _viewMyRequests() {
     container.className = '';
     container.innerHTML = '<div style="color:#666;text-align:center;padding:40px 0;">Загрузка...</div>';
 
-    window._fbGet(window._fbRef(window._fbDb, 'users/' + window.currentPlayer.uid + '/pendingSubmissions')).then(function(snap) {
+    const me = window.currentPlayer;
+    window._fbGet(window._fbRef(window._fbDb, 'users/' + me.uid + '/pendingSubmissions')).then(function(snap) {
         const data = snap.val();
         const entries = data ? Object.keys(data).map(function(pid){ return Object.assign({pid: pid}, data[pid]); }) : [];
-        const pending = entries.filter(function(e){ return e.status === 'pending'; })
-                                .sort(function(a,b){ return (b.createdAt||0) - (a.createdAt||0); });
-        if (pending.length) {
-            container.innerHTML = '<div style="max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:12px;">' +
-                pending.map(function(data) {
-                    const when = data.createdAt ? new Date(data.createdAt).toLocaleString('ru-RU') : '';
-                    return '<div style="background:rgba(234,179,8,0.06);border:1px solid rgba(234,179,8,0.3);border-radius:14px;padding:20px 22px;">'
+
+        // Фон, который сейчас реально стоит в профиле: если он совпал с ссылкой из заявки -
+        // значит администратор её выполнил, заявку можно убрать из списка.
+        const prof = (typeof _bgFindProfile === 'function') ? _bgFindProfile(me.nick) : null;
+        const curBg = prof && prof.bgImage ? String(prof.bgImage) : '';
+
+        const cards = [];
+        entries.forEach(function(e) {
+            if (e.type === 'background') {
+                if (e.status === 'pending' && curBg && e.url && curBg === e.url) {
+                    window._fbDb.ref('users/' + me.uid + '/pendingSubmissions/' + e.pid).remove().catch(function(){});
+                    return;
+                }
+                if ((e.status === 'pending' || e.status === 'rejected') && typeof _bgRequestCardHtml === 'function') {
+                    cards.push({ t: e.createdAt || 0, html: _bgRequestCardHtml(e) });
+                }
+            } else if (e.status === 'pending') {
+                const when = e.createdAt ? new Date(e.createdAt).toLocaleString('ru-RU') : '';
+                cards.push({ t: e.createdAt || 0, html:
+                    '<div style="background:rgba(234,179,8,0.06);border:1px solid rgba(234,179,8,0.3);border-radius:14px;padding:20px 22px;">'
                         + '<div style="display:flex;align-items:center;gap:9px;margin-bottom:8px;">'
                             + '<span style="width:9px;height:9px;border-radius:50%;background:#eab308;box-shadow:0 0 6px #eab30888;animation:pulse-dot 2s cubic-bezier(0.4,0,0.6,1) infinite;flex-shrink:0;"></span>'
                             + '<span style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#eab308;">Заявка на рассмотрении</span>'
                         + '</div>'
-                        + '<div style="font-size:16px;font-weight:800;color:#fff;margin-bottom:4px;">' + _escHtml(data.title || '') + '</div>'
+                        + '<div style="font-size:16px;font-weight:800;color:#fff;margin-bottom:4px;">' + _escHtml(e.title || '') + '</div>'
                         + (when ? '<div style="font-size:11px;color:#666;margin-bottom:10px;">Отправлена: ' + when + '</div>' : '')
                         + '<div style="font-size:12px;color:#999;line-height:1.6;">Постройка появится на сайте, как только администратор её проверит и опубликует. Как только это произойдёт, статус здесь обновится.</div>'
-                    + '</div>';
-                }).join('') +
+                    + '</div>' });
+            }
+        });
+        cards.sort(function(a, b) { return b.t - a.t; });
+
+        if (cards.length) {
+            container.innerHTML = '<div style="max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:12px;">' +
+                cards.map(function(c) { return c.html; }).join('') +
             '</div>';
         } else {
             container.innerHTML = '<div style="color:#666;text-align:center;padding:40px 0;font-size:13px;">Активных заявок нет — можешь отправить новую через «Заявить о постройке».</div>';
@@ -2262,6 +2305,7 @@ function _openAuthorProfileImpl(nameOverride) {
             bgEl.style.background = 'linear-gradient(120deg,#0e0e0e 0%,#1a1500 40%,#111 100%)';
         }
     }
+    if (typeof _bgUpdateEditBtn === 'function') _bgUpdateEditBtn(authorName);
     const headEl = document.getElementById('profile-head');
     if (headEl) headEl.src = `https://visage.surgeplay.com/head/96/${getSkin(authorName)}`;
     document.getElementById('profile-name').innerText = authorName;
@@ -2992,12 +3036,10 @@ function _applyAuthUI(player) {
     const guestWrap  = document.getElementById('profile-guest-wrap');
     const navWrap    = document.getElementById('profile-nav-wrap');
     const claimBtn   = document.getElementById('claim-build-btn');
-    const supportBtn = document.getElementById('header-support-btn');
     if (player) {
         if (guestWrap) guestWrap.style.display = 'none';
         if (navWrap) navWrap.style.display = '';
         if (claimBtn) claimBtn.style.display = '';
-        if (supportBtn) supportBtn.style.display = '';
         const head = document.getElementById('profile-nav-head');
         const nickEl = document.getElementById('profile-nav-nick');
         if (head) head.src = 'https://visage.surgeplay.com/head/28/' + encodeURIComponent(getSkin(player.nick));
@@ -3006,7 +3048,6 @@ function _applyAuthUI(player) {
         if (guestWrap) guestWrap.style.display = '';
         if (navWrap) navWrap.style.display = 'none';
         if (claimBtn) claimBtn.style.display = 'none';
-        if (supportBtn) supportBtn.style.display = 'none';
     }
 }
 
@@ -11141,5 +11182,282 @@ function _eventImgLightbox(url, title) {
         <a href="#" onclick="event.preventDefault();_profileDropdownToggle();toggleQuestion(true)" style="display:block;padding:11px 16px;font-size:12px;font-weight:700;color:#eee;border-top:1px solid rgba(255,255,255,0.06);">Тех. поддержка</a>
         <a href="#" onclick="event.preventDefault();_profileDropdownToggle();_authLogout()" style="display:block;padding:11px 16px;font-size:12px;font-weight:700;color:#f87171;border-top:1px solid rgba(255,255,255,0.06);">Выйти</a>
     </div>
+
+    <!-- Заявка на смену фона профиля -->
+    <div id="bg-req-overlay" onclick="_bgReqClose()"
+         style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);z-index:130;align-items:center;justify-content:center;padding:16px;overflow-y:auto;">
+        <div onclick="event.stopPropagation()" style="background:#1a1a1a;width:100%;max-width:460px;border-radius:18px;border:1px solid rgba(255,255,255,0.1);overflow:hidden;margin:auto;box-shadow:0 32px 80px rgba(0,0,0,0.85);">
+            <div style="height:4px;background:linear-gradient(90deg,#D4AF37,#f5d77e,#B8860B);"></div>
+            <div style="padding:22px;position:relative;">
+                <button onclick="_bgReqClose()"
+                        style="position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.1);color:#888;cursor:pointer;font-size:12px;line-height:1;transition:all .15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#888'">✕</button>
+
+                <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.2em;color:#D4AF37;margin-bottom:3px;">Classic HUB</div>
+                <h3 style="font-size:17px;font-weight:900;text-transform:uppercase;margin-bottom:4px;padding-right:36px;color:#fff;">Фон профиля</h3>
+                <p style="font-size:11px;color:#555;margin-bottom:16px;line-height:1.6;">Вставь ссылку на картинку. Заявка уйдёт администратору на проверку, а фон он установит вручную.</p>
+
+                <div style="position:relative;height:110px;border-radius:12px;overflow:hidden;margin-bottom:14px;border:1px solid rgba(255,255,255,0.08);background:#0f0f0f;">
+                    <div id="bg-req-preview-img" style="position:absolute;inset:0;background:linear-gradient(120deg,#0e0e0e 0%,#1a1500 40%,#111 100%);background-size:cover;background-position:center;"></div>
+                    <div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,0.90) 0%,rgba(0,0,0,0.65) 45%,rgba(0,0,0,0.15) 100%);"></div>
+                    <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 10% 100%,rgba(212,175,55,0.15) 0%,transparent 50%);pointer-events:none;"></div>
+                    <div id="bg-req-preview-name" style="position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:1.15rem;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,0.9);max-width:70%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+                    <div id="bg-req-preview-ph" style="position:absolute;right:14px;bottom:10px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.15em;color:#444;">Превью</div>
+                </div>
+
+                <label style="display:block;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.15em;color:#666;margin-bottom:6px;">Ссылка на картинку</label>
+                <input id="bg-req-url" type="url" inputmode="url" autocomplete="off" spellcheck="false" maxlength="500" placeholder="https://..."
+                       oninput="_bgReqInput()" onkeydown="if(event.key==='Enter'){event.preventDefault();_bgReqSubmit();}"
+                       style="width:100%;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px 12px;color:#fff;font-size:12px;outline:none;font-family:inherit;box-sizing:border-box;"
+                       onfocus="this.style.borderColor='rgba(212,175,55,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+                <div style="font-size:10px;color:#555;margin-top:6px;line-height:1.6;">Нужна прямая ссылка на файл (.jpg, .png, .webp, .gif). Лучше широкая картинка от 1200×400.</div>
+
+                <div id="bg-req-note" style="display:none;font-size:10px;color:#eab308;margin-top:10px;padding:8px 10px;background:rgba(234,179,8,0.07);border:1px solid rgba(234,179,8,0.25);border-radius:8px;line-height:1.5;"></div>
+                <div id="bg-req-err"  style="display:none;font-size:10px;color:#f87171;margin-top:10px;padding:8px 10px;background:rgba(185,28,28,0.1);border:1px solid rgba(185,28,28,0.25);border-radius:8px;line-height:1.5;"></div>
+                <div id="bg-req-ok"   style="display:none;font-size:10px;color:#4ade80;font-weight:700;margin-top:10px;padding:8px 10px;background:#0a1a0a;border:1px solid rgba(74,222,128,0.25);border-radius:8px;line-height:1.5;"></div>
+
+                <button id="bg-req-submit" onclick="_bgReqSubmit()" disabled
+                        style="width:100%;margin-top:14px;background:#D4AF37;border:none;color:#000;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;padding:12px;border-radius:10px;cursor:pointer;font-family:inherit;opacity:.4;transition:opacity .15s,background .15s;">
+                    Отправить на проверку
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    /* ===== Смена фона профиля: заявка на верификацию ===== */
+    var _BG_URL_RE = /^https:\/\/[^\s'"()<>\\`]+$/i;
+    var _BG_URL_MAX = 500;
+    var _BG_COOLDOWN_MS = 5 * 60 * 1000;
+    var _bgReqState = { url: '', valid: false, busy: false, timer: null };
+
+    function _bgFindProfile(nick) {
+        if (!nick || typeof authorProfiles === 'undefined' || !authorProfiles) return null;
+        if (authorProfiles[nick]) return authorProfiles[nick];
+        var low = String(nick).toLowerCase();
+        var k = Object.keys(authorProfiles).find(function(n) { return n.toLowerCase() === low; });
+        return k ? authorProfiles[k] : null;
+    }
+
+    // Кнопка «Изменить фон» видна только владельцу профиля
+    function _bgUpdateEditBtn(authorName) {
+        var btn = document.getElementById('profile-bg-edit-btn');
+        if (!btn) return;
+        var me = window.currentPlayer;
+        var own = !!(me && me.nick && authorName && String(me.nick).toLowerCase() === String(authorName).toLowerCase());
+        btn.style.display = own ? 'inline-flex' : 'none';
+    }
+
+    function _bgSetMsg(kind, text) {
+        var err = document.getElementById('bg-req-err');
+        var ok  = document.getElementById('bg-req-ok');
+        err.style.display = 'none'; ok.style.display = 'none';
+        if (!text) return;
+        var el = kind === 'ok' ? ok : err;
+        el.textContent = text;
+        el.style.display = 'block';
+    }
+
+    function _bgSetBtn(enabled, text, done) {
+        var btn = document.getElementById('bg-req-submit');
+        btn.disabled = !enabled;
+        btn.style.opacity = enabled || done ? '1' : '.4';
+        btn.style.cursor = enabled ? 'pointer' : 'default';
+        btn.style.background = done ? '#16a34a' : '#D4AF37';
+        btn.style.color = done ? '#fff' : '#000';
+        if (text) btn.textContent = text;
+    }
+
+    function _bgSetPreview(url) {
+        var el = document.getElementById('bg-req-preview-img');
+        var ph = document.getElementById('bg-req-preview-ph');
+        if (url) {
+            el.style.backgroundImage = "url('" + url + "')";
+            ph.style.display = 'none';
+        } else {
+            el.style.backgroundImage = '';
+            el.style.background = 'linear-gradient(120deg,#0e0e0e 0%,#1a1500 40%,#111 100%)';
+            el.style.backgroundSize = 'cover';
+            el.style.backgroundPosition = 'center';
+            ph.style.display = '';
+        }
+    }
+
+    // Мои заявки типа «фон» из users/<uid>/pendingSubmissions
+    function _bgFetchMine() {
+        var me = window.currentPlayer;
+        return window._fbGet(window._fbRef(window._fbDb, 'users/' + me.uid + '/pendingSubmissions')).then(function(snap) {
+            var data = snap.val() || {};
+            return Object.keys(data)
+                .filter(function(k) { return data[k] && data[k].type === 'background'; })
+                .map(function(k) { return Object.assign({ pid: k }, data[k]); });
+        });
+    }
+
+    function _bgReqOpen() {
+        if (!window.currentPlayer) { toggleAuthModal(true, 'login'); return; }
+        clearTimeout(_bgReqState.timer);
+        _bgReqState = { url: '', valid: false, busy: false, timer: null };
+        document.getElementById('bg-req-url').value = '';
+        document.getElementById('bg-req-preview-name').textContent = window.currentPlayer.nick || '';
+        document.getElementById('bg-req-note').style.display = 'none';
+        _bgSetMsg('', '');
+        _bgSetPreview('');
+        _bgSetBtn(false, 'Отправить на проверку', false);
+        document.getElementById('bg-req-overlay').style.display = 'flex';
+        setTimeout(function() { var i = document.getElementById('bg-req-url'); if (i) i.focus(); }, 60);
+
+        _bgFetchMine().then(function(list) {
+            var pending = list.filter(function(e) { return e.status === 'pending'; });
+            if (pending.length) {
+                var note = document.getElementById('bg-req-note');
+                note.textContent = 'У тебя уже есть заявка на фон на рассмотрении. Новая заменит её.';
+                note.style.display = 'block';
+            }
+        }).catch(function() {});
+    }
+
+    function _bgReqClose() {
+        clearTimeout(_bgReqState.timer);
+        document.getElementById('bg-req-overlay').style.display = 'none';
+    }
+
+    function _bgReqInput() {
+        var url = document.getElementById('bg-req-url').value.trim();
+        clearTimeout(_bgReqState.timer);
+        _bgReqState.valid = false;
+        _bgReqState.url = url;
+        _bgSetBtn(false, '', false);
+        _bgSetMsg('', '');
+        _bgSetPreview('');
+        if (!url) return;
+        if (url.length > _BG_URL_MAX || !_BG_URL_RE.test(url)) {
+            _bgSetMsg('err', 'Нужна прямая ссылка, которая начинается с https://');
+            return;
+        }
+        _bgReqState.timer = setTimeout(function() {
+            var img = new Image();
+            img.onload = function() {
+                if (_bgReqState.url !== url) return;
+                _bgReqState.valid = true;
+                _bgSetPreview(url);
+                _bgSetBtn(true, '', false);
+                if (img.naturalWidth && img.naturalWidth < 800) {
+                    _bgSetMsg('err', 'Картинка небольшая (' + img.naturalWidth + '×' + img.naturalHeight + '), на широком экране фон может выглядеть размытым. Отправить её всё равно можно.');
+                }
+            };
+            img.onerror = function() {
+                if (_bgReqState.url !== url) return;
+                _bgSetMsg('err', 'Не удалось загрузить картинку. Нужна прямая ссылка на файл изображения (.jpg, .png, .webp, .gif).');
+            };
+            img.src = url;
+        }, 450);
+    }
+
+    function _bgReqSubmit() {
+        var st = _bgReqState;
+        if (st.busy) return;
+        var me = window.currentPlayer;
+        if (!me) { _bgReqClose(); toggleAuthModal(true, 'login'); return; }
+        var url = document.getElementById('bg-req-url').value.trim();
+        if (!st.valid || st.url !== url) { _bgSetMsg('err', 'Сначала вставь рабочую ссылку на картинку.'); return; }
+
+        st.busy = true;
+        _bgSetBtn(false, 'Отправляем...', false);
+        _bgSetMsg('', '');
+
+        var base = 'users/' + me.uid + '/pendingSubmissions';
+        var pid = null, oldKeys = [], now = Date.now();
+
+        _bgFetchMine().then(function(list) {
+            var pending = list.filter(function(e) { return e.status === 'pending'; });
+            var recent = pending.filter(function(e) { return now - (e.createdAt || 0) < _BG_COOLDOWN_MS; })[0];
+            if (recent) {
+                var left = Math.ceil((_BG_COOLDOWN_MS - (now - recent.createdAt)) / 60000);
+                var err = new Error('cooldown');
+                err.userMsg = 'Заявку на фон можно отправлять не чаще раза в 5 минут. Подожди ещё ~' + left + ' мин.';
+                throw err;
+            }
+            oldKeys = pending.map(function(e) { return e.pid; });
+            pid = _fbCompat.ref(base).push().key;
+
+            // 1) запись для вкладки «Мои заявки»
+            return _fbCompat.ref(base + '/' + pid).set({
+                type: 'background', title: 'Смена фона профиля', url: url, status: 'pending', createdAt: now
+            });
+        }).then(function() {
+            // 2) очередь для админа (не критично: основной канал - Telegram)
+            return _fbCompat.ref('pendingBackgrounds/' + pid).set({
+                url: url, uid: me.uid, nick: me.nick, status: 'pending', createdAt: now
+            }).catch(function(e) { console.warn('[pendingBackgrounds] не записалось:', e); });
+        }).then(function() {
+            // 3) Telegram
+            var text = [
+                '🖼 <b>Заявка на смену фона профиля</b>',
+                '',
+                '👤 <b>Ник:</b> ' + escapeHtml(me.nick),
+                '🔗 <b>Ссылка:</b> ' + escapeHtml(url),
+                '🆔 <b>UID:</b> <code>' + escapeHtml(me.uid) + '</code>',
+                '🗂 <b>Заявка:</b> <code>' + escapeHtml(pid) + '</code>',
+            ];
+            if (oldKeys.length) text.push('', '♻️ Заменяет предыдущую заявку этого игрока');
+            text = text.join('\n');
+            return chSendMessage(text);
+        }).then(function(data) {
+            if (!data || !data.ok) throw new Error((data && data.description) || 'Ошибка отправки');
+            // убираем прежние (заменённые) заявки только после успешной отправки новой
+            oldKeys.forEach(function(k) {
+                _fbCompat.ref(base + '/' + k).remove().catch(function() {});
+                _fbCompat.ref('pendingBackgrounds/' + k).remove().catch(function() {});
+            });
+            _bgSetBtn(false, '✓ Заявка отправлена!', true);
+            _bgSetMsg('ok', 'Готово! Заявка появится во вкладке «Мои заявки» и будет висеть там, пока администратор её не проверит и не установит фон.');
+            setTimeout(_bgReqClose, 2600);
+        }).catch(function(e) {
+            console.error('[bgRequest]', e);
+            // откатываем то, что успели записать, чтобы не осталось «висячей» заявки
+            if (pid) {
+                _fbCompat.ref(base + '/' + pid).remove().catch(function() {});
+                _fbCompat.ref('pendingBackgrounds/' + pid).remove().catch(function() {});
+            }
+            st.busy = false;
+            _bgSetBtn(st.valid, 'Отправить на проверку', false);
+            _bgSetMsg('err', e && e.userMsg ? e.userMsg : 'Не удалось отправить заявку. Проверь соединение и попробуй ещё раз.');
+        });
+    }
+
+    // Карточка заявки на фон во вкладке «Мои заявки»
+    function _bgRequestCardHtml(e) {
+        var rejected = e.status === 'rejected';
+        var rgb = rejected ? '248,113,113' : '234,179,8';
+        var hex = rejected ? '#f87171' : '#eab308';
+        var when = e.createdAt ? new Date(e.createdAt).toLocaleString('ru-RU') : '';
+        var url = String(e.url || '');
+        var thumb = _BG_URL_RE.test(url)
+            ? '<div style="height:84px;border-radius:10px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.08);background-color:#111;background-size:cover;background-position:center;background-image:url(\'' + _escHtml(url) + '\');"></div>'
+            : '';
+        var title = rejected ? 'Заявка отклонена' : 'Заявка на рассмотрении';
+        var body = rejected
+            ? (e.reason ? '<div style="font-size:12px;color:#999;line-height:1.6;">Причина: ' + _escHtml(e.reason) + '</div>' : '<div style="font-size:12px;color:#999;line-height:1.6;">Администратор не смог установить этот фон. Можно отправить другую картинку из своего профиля.</div>')
+                + '<button onclick="_bgReqDismiss(\'' + _escHtml(e.pid) + '\')" style="margin-top:12px;background:transparent;border:1px solid rgba(255,255,255,0.15);color:#aaa;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;padding:7px 14px;border-radius:8px;cursor:pointer;font-family:inherit;">Скрыть</button>'
+            : '<div style="font-size:12px;color:#999;line-height:1.6;">Фон будет установлен вручную после проверки администратором. Как только это произойдёт, заявка исчезнет отсюда.</div>';
+        return '<div style="background:rgba(' + rgb + ',0.06);border:1px solid rgba(' + rgb + ',0.3);border-radius:14px;padding:20px 22px;">'
+            + '<div style="display:flex;align-items:center;gap:9px;margin-bottom:8px;">'
+                + '<span style="width:9px;height:9px;border-radius:50%;background:' + hex + ';box-shadow:0 0 6px ' + hex + '88;' + (rejected ? '' : 'animation:pulse-dot 2s cubic-bezier(0.4,0,0.6,1) infinite;') + 'flex-shrink:0;"></span>'
+                + '<span style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:' + hex + ';">' + title + '</span>'
+            + '</div>'
+            + '<div style="font-size:16px;font-weight:800;color:#fff;margin-bottom:4px;">Смена фона профиля</div>'
+            + (when ? '<div style="font-size:11px;color:#666;margin-bottom:12px;">Отправлена: ' + when + '</div>' : '')
+            + thumb + body
+        + '</div>';
+    }
+
+    function _bgReqDismiss(pid) {
+        var me = window.currentPlayer;
+        if (!me || !pid) return;
+        _fbCompat.ref('users/' + me.uid + '/pendingSubmissions/' + pid).remove()
+            .catch(function() {})
+            .then(function() { _viewMyRequests(); });
+    }
+    </script>
 </body>
 </html>
