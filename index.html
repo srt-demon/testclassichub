@@ -11385,10 +11385,10 @@ function _eventImgLightbox(url, title) {
                 type: 'background', title: 'Смена фона профиля', url: url, status: 'pending', createdAt: now
             });
         }).then(function() {
-            // 2) очередь для админа (не критично: основной канал - Telegram)
+            // 2) очередь для админки CHAdmins (вкладка «Заявки») - обязательный шаг
             return _fbCompat.ref('pendingBackgrounds/' + pid).set({
                 url: url, uid: me.uid, nick: me.nick, status: 'pending', createdAt: now
-            }).catch(function(e) { console.warn('[pendingBackgrounds] не записалось:', e); });
+            });
         }).then(function() {
             // 3) Telegram
             var text = [
@@ -11421,7 +11421,7 @@ function _eventImgLightbox(url, title) {
             }
             st.busy = false;
             _bgSetBtn(st.valid, 'Отправить на проверку', false);
-            _bgSetMsg('err', e && e.userMsg ? e.userMsg : 'Не удалось отправить заявку. Проверь соединение и попробуй ещё раз.');
+            _bgSetMsg('err', e && e.userMsg ? e.userMsg : (e && e.code === 'PERMISSION_DENIED' ? 'Нет доступа к базе для отправки заявки. Напиши администратору.' : 'Не удалось отправить заявку. Проверь соединение и попробуй ещё раз.'));
         });
     }
 
