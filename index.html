@@ -2391,6 +2391,15 @@ function _viewMyRequests() {
                 if ((e.status === 'pending' || e.status === 'rejected') && typeof _bgRequestCardHtml === 'function') {
                     cards.push({ t: e.createdAt || 0, html: _bgRequestCardHtml(e) });
                 }
+            } else if (e.type === 'contact') {
+                const curVal = prof && e.field && prof[e.field] ? String(prof[e.field]) : '';
+                if (e.status === 'pending' && curVal && e.value && curVal.toLowerCase() === String(e.value).toLowerCase()) {
+                    window._fbDb.ref('users/' + me.uid + '/pendingSubmissions/' + e.pid).remove().catch(function(){});
+                    return;
+                }
+                if ((e.status === 'pending' || e.status === 'rejected') && typeof _contactRequestCardHtml === 'function') {
+                    cards.push({ t: e.createdAt || 0, html: _contactRequestCardHtml(e) });
+                }
             } else if (e.type === 'skin') {
                 const curSkin = prof && prof.customSkin ? String(prof.customSkin) : '';
                 if (e.status === 'pending' && curSkin && e.skinNick && curSkin.toLowerCase() === String(e.skinNick).toLowerCase()) {
@@ -2552,7 +2561,7 @@ function _openAuthorProfileImpl(nameOverride) {
     document.getElementById('profile-views').innerText = totalViews.toLocaleString('ru-RU');
     document.getElementById('profile-fav-style').innerText = favStyle;
     document.getElementById('profile-joined').innerText = joinedFormatted;
-    _renderProfileContacts(profile);
+    _renderProfileContacts(profile, authorName);
     document.getElementById('profile-ach-count').innerText = unlockedAch.length;
 
     const SKILL_STYLE_ICONS = {
@@ -3341,25 +3350,35 @@ function _loadSupportIcons() {
 }
 
 
-function _renderProfileContacts(profile) {
+function _renderProfileContacts(profile, authorName) {
     var el = document.getElementById('profile-contacts');
     if (!el) return;
     var discord = (profile && profile.discord) || '';
     var forum   = (profile && profile.forum)   || '';
-    if (!discord && !forum) { el.style.display='none'; return; }
+    var _me = window.currentPlayer;
+    var own = !!(_me && _me.nick && authorName && String(_me.nick).toLowerCase() === String(authorName).toLowerCase());
+    if (!discord && !forum && !own) { el.style.display='none'; return; }
     el.style.display = 'flex';
     var html = '';
     if (discord) {
-        var dUrl = discord.startsWith('http') ? discord : 'https://discord.com/users/'+discord.replace(/^@/,'');
-        html += '<a href="'+dUrl+'" target="_blank" style="flex:1;min-width:100px;display:inline-flex;align-items:center;justify-content:center;gap:5px;background:rgba(88,101,242,.12);border:1px solid rgba(88,101,242,.3);border-radius:8px;padding:6px 10px;font-size:9px;font-weight:900;color:#818cf8;text-decoration:none;" onmouseover="this.style.background=\'rgba(88,101,242,.22)\'" onmouseout="this.style.background=\'rgba(88,101,242,.12)\'">'
+        html += '<div style="flex:1;min-width:100px;display:flex;gap:4px;">';
+        var dUrl = discord.startsWith('http') ? discord : 'https://discord.com/users/'+encodeURIComponent(discord.replace(/^@/,''));
+        html += '<a href="'+_escHtml(dUrl)+'" target="_blank" style="flex:1;min-width:100px;display:inline-flex;align-items:center;justify-content:center;gap:5px;background:rgba(88,101,242,.12);border:1px solid rgba(88,101,242,.3);border-radius:8px;padding:6px 10px;font-size:9px;font-weight:900;color:#818cf8;text-decoration:none;" onmouseover="this.style.background=\'rgba(88,101,242,.22)\'" onmouseout="this.style.background=\'rgba(88,101,242,.12)\'">'
             +'<svg viewBox="0 0 24 24" fill="#5865F2" style="width:12px;height:12px;flex-shrink:0;"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.002.022.015.04.034.052a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>'
             +'Discord</a>';
+        html += (own ? _contactEditBtn('discord') : '') + '</div>';
+    } else if (own) {
+        html += _contactAddBtn('discord');
     }
     if (forum) {
+        html += '<div style="flex:1;min-width:100px;display:flex;gap:4px;">';
         var fUrl = forum.startsWith('http') ? forum : 'https://f.simpleminecraft.ru/index.php?/profile/'+forum;
-        html += '<a href="'+fUrl+'" target="_blank" style="flex:1;min-width:100px;display:inline-flex;align-items:center;justify-content:center;gap:5px;background:rgba(212,175,55,.1);border:1px solid rgba(212,175,55,.3);border-radius:8px;padding:6px 10px;font-size:9px;font-weight:900;color:#D4AF37;text-decoration:none;" onmouseover="this.style.background=\'rgba(212,175,55,.2)\'" onmouseout="this.style.background=\'rgba(212,175,55,.1)\'">'
+        html += '<a href="'+_escHtml(fUrl)+'" target="_blank" style="flex:1;min-width:100px;display:inline-flex;align-items:center;justify-content:center;gap:5px;background:rgba(212,175,55,.1);border:1px solid rgba(212,175,55,.3);border-radius:8px;padding:6px 10px;font-size:9px;font-weight:900;color:#D4AF37;text-decoration:none;" onmouseover="this.style.background=\'rgba(212,175,55,.2)\'" onmouseout="this.style.background=\'rgba(212,175,55,.1)\'">'
             +'<svg viewBox="0 0 24 24" fill="#D4AF37" style="width:12px;height:12px;flex-shrink:0;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>'
             +'Форум SMC</a>';
+        html += (own ? _contactEditBtn('forum') : '') + '</div>';
+    } else if (own) {
+        html += _contactAddBtn('forum');
     }
     el.innerHTML = html;
 }
@@ -4509,6 +4528,7 @@ function renderInfo() {
                     _infoBullet('После входа в шапке появляется меню профиля: <span class="text-white font-bold">«Мой профиль»</span>, <span class="text-white font-bold">«Мои постройки»</span>, <span class="text-white font-bold">«Мои заявки»</span> и <span class="text-white font-bold">«Тех. поддержка»</span>') +
                     _infoBullet('Время на сайте тоже приносит EXP: «Неделя на сайте» <span class="gold-accent font-bold">' + _achExp('week_on_site') + '</span>, «Месяц на сайте» <span class="gold-accent font-bold">' + _achExp('month_on_site') + '</span>, «Год на сайте» <span class="gold-accent font-bold">' + _achExp('year_on_site') + '</span>') +
                     _infoBullet('Ник уже есть в архиве, а регистрация не проходит? Напиши в <a href="#" onclick="event.preventDefault();toggleQuestion(true)" class="gold-accent font-bold hover:underline">Тех. поддержку</a> - админ привяжет аккаунт к автору') +
+                    _infoBullet('Discord и ссылку на форум SMC можно указать в профиле: карандашик рядом с контактом или «+», если его ещё нет. Заявка уйдёт администратору') +
                     _infoBullet('Скин можно сменить в своём профиле кнопкой <span class="text-white font-bold">«Сменить скин»</span> - введи ник нужного скина, и заявка уйдёт администратору') +
                     _infoBullet('Забыл пароль - нажми «Забыли пароль?» в окне входа, мы отправим письмо для сброса') +
                 '</ul>',
@@ -11768,6 +11788,293 @@ function _eventImgLightbox(url, title) {
     }
 
     function _skinReqDismiss(pid) {
+        var me = window.currentPlayer;
+        if (!me || !pid) return;
+        _fbCompat.ref('users/' + me.uid + '/pendingSubmissions/' + pid).remove()
+            .catch(function() {})
+            .then(function() { _viewMyRequests(); });
+    }
+    </script>
+
+
+    <div id="contact-req-overlay" onclick="_contactReqClose()"
+         style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);z-index:130;align-items:center;justify-content:center;padding:16px;overflow-y:auto;">
+        <div onclick="event.stopPropagation()" style="background:#1a1a1a;width:100%;max-width:460px;border-radius:18px;border:1px solid rgba(255,255,255,0.1);overflow:hidden;margin:auto;box-shadow:0 32px 80px rgba(0,0,0,0.85);">
+            <div style="height:4px;background:linear-gradient(90deg,#D4AF37,#f5d77e,#B8860B);"></div>
+            <div style="padding:22px;position:relative;">
+                <button onclick="_contactReqClose()"
+                        style="position:absolute;top:14px;right:14px;width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.1);color:#888;cursor:pointer;font-size:12px;line-height:1;">✕</button>
+
+                <div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.2em;color:#D4AF37;margin-bottom:3px;">Classic HUB</div>
+                <h3 id="contact-req-title" style="font-size:17px;font-weight:900;text-transform:uppercase;margin-bottom:4px;padding-right:36px;color:#fff;"></h3>
+                <p id="contact-req-lead" style="font-size:11px;color:#555;margin-bottom:16px;line-height:1.6;"></p>
+
+                <div style="margin-bottom:14px;padding:12px 14px;border-radius:12px;background:#0f0f0f;border:1px solid rgba(255,255,255,0.08);">
+                    <div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:#666;margin-bottom:3px;">Сейчас в профиле</div>
+                    <div id="contact-req-cur" style="font-size:12px;font-weight:800;color:#bbb;word-break:break-all;"></div>
+                </div>
+
+                <label id="contact-req-label" style="display:block;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.15em;color:#666;margin-bottom:6px;"></label>
+                <input id="contact-req-value" type="text" autocomplete="off" spellcheck="false" maxlength="200"
+                       oninput="_contactReqInput()" onkeydown="if(event.key==='Enter'){event.preventDefault();_contactReqSubmit();}"
+                       style="width:100%;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px 12px;color:#fff;font-size:12px;outline:none;font-family:inherit;box-sizing:border-box;"
+                       onfocus="this.style.borderColor='rgba(212,175,55,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+                <div id="contact-req-hint" style="font-size:10px;color:#555;margin-top:6px;line-height:1.6;"></div>
+
+                <div id="contact-req-note" style="display:none;font-size:10px;color:#eab308;margin-top:10px;padding:8px 10px;background:rgba(234,179,8,0.07);border:1px solid rgba(234,179,8,0.25);border-radius:8px;line-height:1.5;"></div>
+                <div id="contact-req-err"  style="display:none;font-size:10px;color:#f87171;margin-top:10px;padding:8px 10px;background:rgba(185,28,28,0.1);border:1px solid rgba(185,28,28,0.25);border-radius:8px;line-height:1.5;"></div>
+                <div id="contact-req-ok"   style="display:none;font-size:10px;color:#4ade80;font-weight:700;margin-top:10px;padding:8px 10px;background:#0a1a0a;border:1px solid rgba(74,222,128,0.25);border-radius:8px;line-height:1.5;"></div>
+
+                <button id="contact-req-submit" onclick="_contactReqSubmit()" disabled
+                        style="width:100%;margin-top:14px;background:#D4AF37;border:none;color:#000;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;padding:12px;border-radius:10px;cursor:pointer;font-family:inherit;opacity:.4;">
+                    Отправить на проверку
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    /* ===== Контакты профиля (Discord / форум): заявка администратору ===== */
+    var _CONTACT_COOLDOWN_MS = 5 * 60 * 1000;
+    var _CONTACT_META = {
+        discord: {
+            name: 'Discord', reqTitle: 'Смена Discord', cardTitle: 'Смена Discord',
+            lead: 'Укажи свой Discord, он появится в профиле. Заявка уйдёт администратору, а контакт он установит вручную.',
+            label: 'Discord ник или ссылка',
+            hint: 'Твой ник в Discord (например smc.slowdown) или ссылка вида https://discord.com/users/ник. Подойдёт и числовой ID. В профиле на сайте это будет ссылка, которая открывается по нажатию.',
+            ph: 'smc.slowdown'
+        },
+        forum: {
+            name: 'Форум SMC', reqTitle: 'Смена ссылки на форум', cardTitle: 'Смена ссылки на форум',
+            lead: 'Укажи свой профиль на форуме SMC, он появится в профиле. Заявка уйдёт администратору, а ссылку он установит вручную.',
+            label: 'Ссылка на профиль или ник',
+            hint: 'Лучше всего вставить полную ссылку на свой профиль: https://f.simpleminecraft.ru/... Можно и просто ник на форуме.',
+            ph: 'https://f.simpleminecraft.ru/index.php?/profile/...'
+        }
+    };
+    var _DISCORD_ID_RE = /^\d{17,20}$/;
+    var _DISCORD_LINK_RE = /^https:\/\/discord\.com\/users\/([A-Za-z0-9_.]{2,32})\/?$/i;
+    var _DISCORD_NAME_RE = /^[a-z0-9_.]{2,32}$/;
+    var _FORUM_LINK_RE = /^https:\/\/f\.simpleminecraft\.ru\/[^\s<>"'`\\]+$/i;
+    var _FORUM_NICK_RE = /^[\p{L}\p{N}_.\-]{1,40}$/u;
+    var _contactReqState = { field: '', value: '', valid: false, busy: false };
+
+    function _contactNormalize(field, raw) {
+        var v = String(raw || '').trim();
+        if (!v) return { ok: false, msg: '' };
+        if (field === 'discord') {
+            if (_DISCORD_ID_RE.test(v)) return { ok: true, value: v };
+            var m = v.match(_DISCORD_LINK_RE);
+            if (m) v = m[1];
+            v = v.replace(/^@/, '').toLowerCase();
+            if (_DISCORD_ID_RE.test(v) || (_DISCORD_NAME_RE.test(v) && v.indexOf('..') < 0)) return { ok: true, value: v };
+            return { ok: false, msg: 'Нужен ник Discord (2-32 символа: латиница, цифры, _ и точка), ссылка https://discord.com/users/ник или числовой ID.' };
+        }
+        if (v.length <= 200 && _FORUM_LINK_RE.test(v)) return { ok: true, value: v };
+        if (_FORUM_NICK_RE.test(v)) return { ok: true, value: v };
+        return { ok: false, msg: 'Нужна ссылка https://f.simpleminecraft.ru/... или ник (буквы, цифры, _ . -).' };
+    }
+
+    function _contactEditBtn(field) {
+        return '<button type="button" onclick="_contactReqOpen(\'' + field + '\')" title="Изменить" aria-label="Изменить"'
+            + ' style="width:28px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;background:rgba(0,0,0,0.4);border:1px solid rgba(212,175,55,0.35);color:#D4AF37;cursor:pointer;transition:background .15s,color .15s;"'
+            + ' onmouseover="this.style.background=\'#D4AF37\';this.style.color=\'#000\'" onmouseout="this.style.background=\'rgba(0,0,0,0.4)\';this.style.color=\'#D4AF37\'">'
+            + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>'
+            + '</button>';
+    }
+
+    function _contactAddBtn(field) {
+        return '<button type="button" onclick="_contactReqOpen(\'' + field + '\')"'
+            + ' style="flex:1;min-width:100px;display:inline-flex;align-items:center;justify-content:center;gap:5px;background:transparent;border:1px dashed rgba(212,175,55,0.4);border-radius:8px;padding:6px 10px;font-size:9px;font-weight:900;color:#D4AF37;cursor:pointer;font-family:inherit;transition:background .15s;"'
+            + ' onmouseover="this.style.background=\'rgba(212,175,55,0.12)\'" onmouseout="this.style.background=\'transparent\'">'
+            + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" style="width:11px;height:11px;"><path d="M12 5v14M5 12h14"/></svg>'
+            + _CONTACT_META[field].name + '</button>';
+    }
+
+    function _contactSetMsg(kind, text) {
+        var err = document.getElementById('contact-req-err');
+        var ok  = document.getElementById('contact-req-ok');
+        err.style.display = 'none'; ok.style.display = 'none';
+        if (!text) return;
+        var el = kind === 'ok' ? ok : err;
+        el.textContent = text;
+        el.style.display = 'block';
+    }
+
+    function _contactSetBtn(enabled, text, done) {
+        var btn = document.getElementById('contact-req-submit');
+        btn.disabled = !enabled;
+        btn.style.opacity = enabled || done ? '1' : '.4';
+        btn.style.cursor = enabled ? 'pointer' : 'default';
+        btn.style.background = done ? '#16a34a' : '#D4AF37';
+        btn.style.color = done ? '#fff' : '#000';
+        if (text) btn.textContent = text;
+    }
+
+    // Мои заявки типа «контакт» из users/<uid>/pendingSubmissions
+    function _contactFetchMine(field) {
+        var me = window.currentPlayer;
+        return window._fbGet(window._fbRef(window._fbDb, 'users/' + me.uid + '/pendingSubmissions')).then(function(snap) {
+            var data = snap.val() || {};
+            return Object.keys(data)
+                .filter(function(k) { return data[k] && data[k].type === 'contact' && (!field || data[k].field === field); })
+                .map(function(k) { return Object.assign({ pid: k }, data[k]); });
+        });
+    }
+
+    function _contactReqOpen(field) {
+        if (!window.currentPlayer) { toggleAuthModal(true, 'login'); return; }
+        var meta = _CONTACT_META[field];
+        if (!meta) return;
+        var me = window.currentPlayer;
+        var prof = (typeof _bgFindProfile === 'function') ? _bgFindProfile(me.nick) : null;
+        var cur = prof && prof[field] ? String(prof[field]) : '';
+        _contactReqState = { field: field, value: '', valid: false, busy: false };
+        document.getElementById('contact-req-title').textContent = meta.reqTitle;
+        document.getElementById('contact-req-lead').textContent = meta.lead;
+        document.getElementById('contact-req-label').textContent = meta.label;
+        document.getElementById('contact-req-hint').textContent = meta.hint;
+        document.getElementById('contact-req-cur').textContent = cur || 'Не указан';
+        var inp = document.getElementById('contact-req-value');
+        inp.value = ''; inp.placeholder = meta.ph;
+        document.getElementById('contact-req-note').style.display = 'none';
+        _contactSetMsg('', '');
+        _contactSetBtn(false, 'Отправить на проверку', false);
+        document.getElementById('contact-req-overlay').style.display = 'flex';
+        setTimeout(function() { inp.focus(); }, 60);
+
+        _contactFetchMine(field).then(function(list) {
+            var pending = list.filter(function(e) { return e.status === 'pending'; });
+            if (pending.length) {
+                var note = document.getElementById('contact-req-note');
+                note.textContent = 'У тебя уже есть заявка на смену этого контакта на рассмотрении. Новая заменит её.';
+                note.style.display = 'block';
+            }
+        }).catch(function() {});
+    }
+
+    function _contactReqClose() {
+        document.getElementById('contact-req-overlay').style.display = 'none';
+    }
+
+    function _contactReqInput() {
+        var st = _contactReqState;
+        var raw = document.getElementById('contact-req-value').value;
+        st.valid = false; st.value = '';
+        _contactSetBtn(false, '', false);
+        _contactSetMsg('', '');
+        var n = _contactNormalize(st.field, raw);
+        if (!raw.trim()) return;
+        if (!n.ok) { _contactSetMsg('err', n.msg); return; }
+        var me = window.currentPlayer;
+        var prof = (me && typeof _bgFindProfile === 'function') ? _bgFindProfile(me.nick) : null;
+        var cur = prof && prof[st.field] ? String(prof[st.field]) : '';
+        if (cur && cur.toLowerCase() === n.value.toLowerCase()) { _contactSetMsg('err', 'Это значение уже указано в твоём профиле.'); return; }
+        st.valid = true; st.value = n.value;
+        _contactSetBtn(true, '', false);
+    }
+
+    function _contactReqSubmit() {
+        var st = _contactReqState;
+        if (st.busy) return;
+        var me = window.currentPlayer;
+        if (!me) { _contactReqClose(); toggleAuthModal(true, 'login'); return; }
+        var field = st.field, meta = _CONTACT_META[field];
+        var n = _contactNormalize(field, document.getElementById('contact-req-value').value);
+        if (!meta || !st.valid || !n.ok || n.value !== st.value) { _contactSetMsg('err', 'Сначала введи корректное значение.'); return; }
+        var value = n.value;
+
+        st.busy = true;
+        _contactSetBtn(false, 'Отправляем...', false);
+        _contactSetMsg('', '');
+
+        var base = 'users/' + me.uid + '/pendingSubmissions';
+        var pid = null, oldKeys = [], now = Date.now();
+        var prof = (typeof _bgFindProfile === 'function') ? _bgFindProfile(me.nick) : null;
+        var curVal = prof && prof[field] ? String(prof[field]) : '';
+
+        _contactFetchMine(field).then(function(list) {
+            var pending = list.filter(function(e) { return e.status === 'pending'; });
+            var recent = pending.filter(function(e) { return now - (e.createdAt || 0) < _CONTACT_COOLDOWN_MS; })[0];
+            if (recent) {
+                var left = Math.ceil((_CONTACT_COOLDOWN_MS - (now - recent.createdAt)) / 60000);
+                var err = new Error('cooldown');
+                err.userMsg = 'Заявку на этот контакт можно отправлять не чаще раза в 5 минут. Подожди ещё ~' + left + ' мин.';
+                throw err;
+            }
+            oldKeys = pending.map(function(e) { return e.pid; });
+            pid = _fbCompat.ref(base).push().key;
+
+            // 1) запись для вкладки «Мои заявки»
+            return _fbCompat.ref(base + '/' + pid).set({
+                type: 'contact', field: field, title: meta.cardTitle, value: value, status: 'pending', createdAt: now
+            });
+        }).then(function() {
+            // 2) очередь для админки CHAdmins (вкладка «Заявки»)
+            return _fbCompat.ref('pendingContacts/' + pid).set({
+                field: field, value: value, uid: me.uid, nick: me.nick, status: 'pending', createdAt: now
+            });
+        }).then(function() {
+            // 3) Telegram
+            var text = [
+                (field === 'discord' ? '💬' : '🌐') + ' <b>Заявка на смену контакта: ' + escapeHtml(meta.name) + '</b>',
+                '',
+                '👤 <b>Ник на сайте:</b> ' + escapeHtml(me.nick),
+                '🎯 <b>Новое значение:</b> ' + escapeHtml(value),
+                '↩️ <b>Сейчас:</b> ' + escapeHtml(curVal || 'не указано'),
+                '🆔 <b>UID:</b> <code>' + escapeHtml(me.uid) + '</code>',
+                '🗂 <b>Заявка:</b> <code>' + escapeHtml(pid) + '</code>'
+            ];
+            if (oldKeys.length) text.push('', '♻️ Заменяет предыдущую заявку этого игрока');
+            return chSendMessage(text.join('\n'));
+        }).then(function(data) {
+            if (!data || !data.ok) throw new Error((data && data.description) || 'Ошибка отправки');
+            oldKeys.forEach(function(k) {
+                _fbCompat.ref(base + '/' + k).remove().catch(function() {});
+                _fbCompat.ref('pendingContacts/' + k).remove().catch(function() {});
+            });
+            _contactSetBtn(false, '✓ Заявка отправлена!', true);
+            _contactSetMsg('ok', 'Готово! Заявка появится во вкладке «Мои заявки» и будет висеть там, пока администратор не обновит профиль.');
+            setTimeout(_contactReqClose, 2600);
+        }).catch(function(e) {
+            console.error('[contactRequest]', e);
+            if (pid) {
+                _fbCompat.ref(base + '/' + pid).remove().catch(function() {});
+                _fbCompat.ref('pendingContacts/' + pid).remove().catch(function() {});
+            }
+            st.busy = false;
+            _contactSetBtn(st.valid, 'Отправить на проверку', false);
+            _contactSetMsg('err', e && e.userMsg ? e.userMsg : (e && e.code === 'PERMISSION_DENIED' ? 'Нет доступа к базе для отправки заявки. Напиши администратору.' : 'Не удалось отправить заявку. Проверь соединение и попробуй ещё раз.'));
+        });
+    }
+
+    // Карточка заявки на контакт во вкладке «Мои заявки»
+    function _contactRequestCardHtml(e) {
+        var rejected = e.status === 'rejected';
+        var rgb = rejected ? '248,113,113' : '234,179,8';
+        var hex = rejected ? '#f87171' : '#eab308';
+        var meta = _CONTACT_META[e.field] || { name: 'Контакт', cardTitle: 'Смена контакта' };
+        var when = e.createdAt ? new Date(e.createdAt).toLocaleString('ru-RU') : '';
+        var title = rejected ? 'Заявка отклонена' : 'Заявка на рассмотрении';
+        var valueBox = '<div style="margin-bottom:12px;padding:10px 12px;border-radius:10px;background:#0f0f0f;border:1px solid rgba(255,255,255,0.08);">'
+            + '<div style="font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:#666;margin-bottom:2px;">' + _escHtml(meta.name) + '</div>'
+            + '<div style="font-size:13px;font-weight:800;color:#fff;word-break:break-all;">' + _escHtml(e.value || '') + '</div></div>';
+        var body = rejected
+            ? (e.reason ? '<div style="font-size:12px;color:#999;line-height:1.6;">Причина: ' + _escHtml(e.reason) + '</div>' : '<div style="font-size:12px;color:#999;line-height:1.6;">Администратор не смог установить это значение. Можно отправить другое из профиля.</div>')
+                + '<button onclick="_contactReqDismiss(\'' + _escHtml(e.pid) + '\')" style="margin-top:12px;background:transparent;border:1px solid rgba(255,255,255,0.15);color:#aaa;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;padding:7px 14px;border-radius:8px;cursor:pointer;font-family:inherit;">Скрыть</button>'
+            : '<div style="font-size:12px;color:#999;line-height:1.6;">Значение будет установлено вручную после проверки администратором. Как только это произойдёт, заявка исчезнет отсюда.</div>';
+        return '<div style="background:rgba(' + rgb + ',0.06);border:1px solid rgba(' + rgb + ',0.3);border-radius:14px;padding:20px 22px;">'
+            + '<div style="display:flex;align-items:center;gap:9px;margin-bottom:8px;">'
+                + '<span style="width:9px;height:9px;border-radius:50%;background:' + hex + ';box-shadow:0 0 6px ' + hex + '88;' + (rejected ? '' : 'animation:pulse-dot 2s cubic-bezier(0.4,0,0.6,1) infinite;') + 'flex-shrink:0;"></span>'
+                + '<span style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:' + hex + ';">' + title + '</span>'
+            + '</div>'
+            + '<div style="font-size:16px;font-weight:800;color:#fff;margin-bottom:4px;">' + _escHtml(meta.cardTitle) + '</div>'
+            + (when ? '<div style="font-size:11px;color:#666;margin-bottom:12px;">Отправлена: ' + when + '</div>' : '')
+            + valueBox + body
+        + '</div>';
+    }
+
+    function _contactReqDismiss(pid) {
         var me = window.currentPlayer;
         if (!me || !pid) return;
         _fbCompat.ref('users/' + me.uid + '/pendingSubmissions/' + pid).remove()
